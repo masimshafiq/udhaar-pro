@@ -7,13 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-
     <style>
         body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; overflow-x: hidden; }
         .tab-content { display: none; }
@@ -21,11 +18,12 @@
         .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 75px; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 0 10px; }
         .plus-container { position: absolute; left: 50%; bottom: 25px; transform: translateX(-50%); z-index: 1001; display: flex; justify-content: center; align-items: center; }
         .raised-btn { background: linear-gradient(135deg, #10b981 0%, #064e3b 100%); width: 68px; height: 68px; border-radius: 50%; display: flex !important; align-items: center !important; justify-content: center !important; color: white; border: 6px solid #f8fafc; box-shadow: 0 10px 20px rgba(6,78,59,0.3); padding: 0; margin: 0; cursor: pointer; }
-        @media (min-width: 768px) { .sidebar { width: 280px; height: 100vh; position: fixed; left: 0; top: 0; background: #064e3b; color: white; display: flex; flex-direction: column; z-index: 100; } .main-content { margin-left: 280px; padding: 30px; } .mobile-nav { display: none; } }
+        @media (min-width: 768px) { .sidebar { width: 280px; height: 100vh; position: fixed; left: 0; top: 0; background: #064e3b; color: white; display: flex; flex-direction: column; z-index: 100; } .main-content { margin-left: 280px; padding: 30px; } .mobile-nav { display: none; } #search-inner-container { max-width: 800px; margin: 0 auto; } }
         @media (max-width: 767px) { .sidebar { display: none; } .main-content { padding: 15px; margin-bottom: 100px; } .mobile-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } }
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         #search-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 3000; display: none; }
+        @media print { body * { visibility: hidden; } #receipt-printable, #receipt-printable * { visibility: visible; } #receipt-printable { position: absolute; left: 0; top: 0; width: 100%; } .no-print { display: none; } }
     </style>
 </head>
 <body>
@@ -34,7 +32,7 @@
         <div id="search-inner-container">
             <div class="flex items-center gap-4 mb-6">
                 <button onclick="toggleSearch()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="arrow-left"></i></button>
-                <input type="text" id="search-input" onkeyup="filterSearch()" placeholder="Search customer..." class="flex-1 p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-lg ring-2 ring-slate-100 focus:ring-emerald-500">
+                <input type="text" id="search-input" onkeyup="filterSearch()" placeholder="Search customer or father name..." class="flex-1 p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-lg ring-2 ring-slate-100 focus:ring-emerald-500 transition-all">
             </div>
             <div id="search-results" class="space-y-3"></div>
         </div>
@@ -46,6 +44,7 @@
             <button onclick="showTab('dashboard')" class="w-full flex items-center gap-4 p-4 rounded-xl font-bold hover:bg-white/10" id="side-dashboard"><i data-lucide="layout-dashboard"></i> Dashboard</button>
             <button onclick="showTab('customers')" class="w-full flex items-center gap-4 p-4 rounded-xl font-bold hover:bg-white/10" id="side-customers"><i data-lucide="users"></i> Customers</button>
             <button onclick="showTab('transactions')" class="w-full flex items-center gap-4 p-4 rounded-xl font-bold hover:bg-white/10" id="side-transactions"><i data-lucide="history"></i> Records</button>
+            <button onclick="showTab('settings')" class="w-full flex items-center gap-4 p-4 rounded-xl font-bold hover:bg-white/10" id="side-settings"><i data-lucide="settings"></i> Settings</button>
         </nav>
     </aside>
 
@@ -69,8 +68,8 @@
                 <div class="bg-amber-500 p-8 rounded-xl text-white shadow-lg"><p class="text-[10px] font-bold opacity-70 uppercase mb-1">Clients</p><h3 id="stat-customers" class="text-lg font-black">0</h3></div>
             </div>
             <div class="flex gap-4">
-                <button onclick="openEntryModal('existing')" class="flex-1 bg-slate-900 text-white py-5 rounded-3xl font-black flex items-center justify-center gap-2 shadow-xl">Add Record</button>
-                <button onclick="openEntryModal('new')" class="flex-1 bg-white text-slate-900 border border-slate-200 py-5 rounded-3xl font-black flex items-center justify-center gap-2 shadow-sm">New Customer</button>
+                <button onclick="openEntryModal('existing')" class="flex-1 bg-slate-900 text-white py-5 rounded-3xl font-black flex items-center justify-center gap-2 shadow-xl"><i data-lucide="plus-circle"></i> Add Record</button>
+                <button onclick="openEntryModal('new')" class="flex-1 bg-white text-slate-900 border border-slate-200 py-5 rounded-3xl font-black flex items-center justify-center gap-2 shadow-sm"><i data-lucide="user-plus"></i> New Customer</button>
             </div>
             <div class="bg-white rounded-[2.5rem] shadow-sm border overflow-hidden">
                 <div class="p-6 border-b font-black text-slate-800">Recent Transactions</div>
@@ -81,39 +80,116 @@
         <section id="customers" class="tab-content space-y-4">
             <div id="customer-list-ui" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </section>
-        <section id="customer-profile" class="tab-content space-y-6"><div id="profile-detail-view"></div></section>
-        <section id="transactions" class="tab-content space-y-4"><div id="full-txn-list" class="space-y-3"></div></section>
+
+        <section id="customer-profile" class="tab-content space-y-6">
+            <div id="profile-detail-view"></div>
+        </section>
+
+        <section id="transactions" class="tab-content space-y-4">
+            <div id="full-txn-list" class="space-y-3"></div>
+        </section>
+
+        <section id="settings" class="tab-content space-y-6">
+            <div class="bg-white p-8 rounded-[2rem] border shadow-sm max-w-xl mx-auto">
+                <h3 class="text-xl font-bold mb-6 text-center">Statement Download</h3>
+                <div class="space-y-4 relative">
+                    <input type="text" id="statement-search" onfocus="filterStatementList()" onkeyup="filterStatementList()" placeholder="Type to search customer..." class="w-full p-4 bg-slate-50 rounded-xl font-bold border outline-none">
+                    <div id="statement-dropdown" class="hidden absolute top-full left-0 right-0 z-50 border rounded-xl max-h-60 overflow-y-auto bg-white shadow-xl mt-1"></div>
+                    <div id="date-range-box" class="hidden space-y-4 p-5 bg-emerald-50 rounded-2xl border border-emerald-100 mt-4">
+                        <div class="flex justify-between items-center mb-2"><span class="text-sm font-bold text-emerald-800" id="selected-cust-name">Selected: ...</span><button onclick="resetStatementSelection()" class="text-[10px] text-rose-500 font-bold uppercase">Change</button></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase">Start Date</label><input type="date" id="start-date" class="w-full p-2 border rounded-lg"></div>
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase">End Date</label><input type="date" id="end-date" class="w-full p-2 border rounded-lg"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="downloadCSV()" class="bg-slate-800 text-white py-4 rounded-xl font-black text-sm">Download CSV</button>
+                            <button onclick="generatePDF()" class="bg-emerald-600 text-white py-4 rounded-xl font-black text-sm">Download PDF</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <nav class="mobile-nav">
+        <button onclick="showTab('dashboard')"><i id="m-icon-dashboard" data-lucide="layout-grid" class="w-6 h-6"></i></button>
+        <button onclick="showTab('customers')" class="mr-14"><i id="m-icon-customers" data-lucide="users" class="w-6 h-6"></i></button>
+        <div class="plus-container">
+            <button onclick="openChoiceModal()" class="raised-btn"><i data-lucide="plus" class="w-8 h-8"></i></button>
+        </div>
+        <button onclick="showTab('transactions')" class="ml-14"><i id="m-icon-transactions" data-lucide="history" class="w-6 h-6"></i></button>
+        <button onclick="showTab('settings')"><i id="m-icon-settings" data-lucide="settings" class="w-6 h-6"></i></button>
+    </nav>
+
+    <div id="edit-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[4000] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[2rem] p-8 shadow-2xl">
+            <h3 class="text-xl font-black mb-6">Edit Customer</h3>
+            <div class="space-y-4">
+                <input type="hidden" id="edit-old-name">
+                <input type="text" id="edit-new-name" placeholder="New Name" class="w-full bg-slate-100 p-4 rounded-xl font-bold border">
+                <input type="text" id="edit-new-father" placeholder="New Father Name" class="w-full bg-slate-100 p-4 rounded-xl font-bold border">
+                <div class="flex gap-2 pt-4">
+                    <button onclick="saveCustomerEdit()" id="editSaveBtn" class="flex-1 bg-emerald-600 text-white py-4 rounded-xl font-black">Save Changes</button>
+                    <button onclick="closeEditModal()" class="px-6 bg-slate-100 text-slate-500 py-4 rounded-xl font-bold">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="receipt-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-[5000] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl">
+            <div id="receipt-printable" class="p-8 bg-white text-sm">
+                <div class="text-center mb-6 border-b pb-4"><h2 class="text-2xl font-black text-[#064e3b]">UdhaarPro</h2><p class="text-[10px] text-slate-400 uppercase">Receipt</p></div>
+                <div class="space-y-4">
+                    <div class="flex justify-between"><span>Date:</span><span id="r-date" class="font-bold"></span></div>
+                    <div class="flex justify-between"><span>Customer:</span><span id="r-name" class="font-bold"></span></div>
+                    <div class="flex justify-between border-t pt-4"><span>Type:</span><span id="r-type" class="font-bold uppercase"></span></div>
+                    <div class="flex justify-between"><span>Amount:</span><span id="r-amount" class="font-black text-lg"></span></div>
+                    <div id="r-desc-container" class="flex flex-col border-t pt-4"><span>Note:</span><span id="r-desc" class="italic font-bold"></span></div>
+                    <div class="flex justify-between border-t pt-4 bg-slate-50 p-2 rounded-lg font-black text-rose-600"><span>Final Bal:</span><span id="r-balance"></span></div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 flex gap-3 no-print"><button onclick="window.print()" class="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold">Print</button><button onclick="closeReceipt()" class="px-6 bg-slate-200 py-3 rounded-xl font-bold">Close</button></div>
+        </div>
+    </div>
+
+    <div id="choice-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[2500] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl relative">
+            <button onclick="closeChoiceModal()" class="absolute top-6 right-6 p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
+            <h3 class="text-xl font-black text-center mb-8">Choose Action</h3>
+            <div class="space-y-4">
+                <button onclick="handleChoice('existing')" class="w-full flex items-center gap-4 bg-slate-900 text-white p-6 rounded-[1.5rem]"><i data-lucide="plus-circle"></i> Add Record</button>
+                <button onclick="handleChoice('new')" class="w-full flex items-center gap-4 bg-white border-2 p-6 rounded-[1.5rem] text-slate-800"><i data-lucide="user-plus"></i> New Customer</button>
+            </div>
+        </div>
     </div>
 
     <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[3000] hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6"><h3 id="modal-title-text" class="text-xl font-bold">New Entry</h3><button onclick="closeModal()" class="p-2 hover:bg-slate-100 rounded-full"><i data-lucide="x"></i></button></div>
             <form id="txnForm" class="space-y-4">
-                <div id="name-input-container"><select id="m-name-select" class="w-full bg-slate-100 p-4 rounded-xl font-bold"></select></div>
-                <div id="new-name-container" class="hidden">
-                    <input type="text" id="m-name-text" placeholder="Customer Name" class="w-full bg-slate-100 p-4 rounded-xl mb-2 border">
+                <div id="name-input-container"><select id="m-name-select" onchange="calculateRealTime()" class="w-full bg-slate-100 p-4 rounded-xl font-bold"></select></div>
+                <div id="new-name-container" class="hidden space-y-4">
+                    <input type="text" id="m-name-text" placeholder="Full Name" class="w-full bg-slate-100 p-4 rounded-xl border">
                     <input type="text" id="m-father-name" placeholder="Father Name" class="w-full bg-slate-100 p-4 rounded-xl border">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <button type="button" onclick="setType('Udhaar')" id="btn-udhaar" class="p-4 rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-700 font-bold">Udhaar (+)</button>
-                    <button type="button" onclick="setType('Paid')" id="btn-paid" class="p-4 rounded-xl border-2 border-slate-100 font-bold text-slate-400">Paid (-)</button>
+                    <button type="button" onclick="setType('Paid')" id="btn-paid" class="p-4 rounded-xl border-2 border-slate-100 font-black text-slate-400">Paid (-)</button>
                 </div>
                 <input type="hidden" id="m-type" value="Udhaar">
-                <input type="number" id="m-amount" required placeholder="Amount" class="w-full bg-slate-100 p-4 rounded-xl text-xl font-black">
-                <input type="text" id="m-desc" placeholder="Description" class="w-full bg-slate-100 p-4 rounded-xl">
-                <button type="submit" id="saveBtn" class="w-full bg-[#064e3b] text-white py-5 rounded-2xl font-black">Confirm & Save</button>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" id="m-amount" onkeyup="calculateRealTime()" required placeholder="0" class="w-full bg-slate-100 p-4 rounded-xl font-black text-xl">
+                    <div class="bg-slate-900 rounded-xl p-4 text-center text-white"><p class="text-[8px] text-emerald-400 uppercase">Estimated Bal</p><p id="calc-preview" class="text-xs font-black">0</p></div>
+                </div>
+                <input type="text" id="m-desc" placeholder="Details (Note)" class="w-full bg-slate-100 p-4 rounded-xl">
+                <button type="submit" id="saveBtn" class="w-full bg-[#064e3b] text-white py-5 rounded-2xl font-black shadow-lg">Confirm & Save</button>
             </form>
-            <button onclick="document.getElementById('modal').classList.add('hidden')" class="w-full mt-4 text-slate-400 font-bold">Close</button>
         </div>
     </div>
 
-    <nav class="mobile-nav">
-        <button onclick="showTab('dashboard')"><i data-lucide="layout-grid"></i></button>
-        <button onclick="showTab('customers')"><i data-lucide="users"></i></button>
-        <button onclick="showTab('transactions')"><i data-lucide="history"></i></button>
-    </nav>
-
     <script>
-        // --- 🔴 APNI DETAILS YAHAN DALEN 🔴 ---
+        // --- FIREBASE CONFIG (Yahan apni details paste karen) ---
         const firebaseConfig = {
             apiKey: "AIzaSyANM3X8DyEji1hUqOOHV7SIBaEXxnvgW7k",
             authDomain: "udhaarpro.firebaseapp.com",
@@ -122,16 +198,14 @@
             messagingSenderId: "230308698204",
             appId: "1:230308698204:web:cb0776e94414b74f2b2e99",
             measurementId: "G-N7PFENLW7S",
-            databaseURL: "https://udhaarpro-default-rtdb.firebaseio.com/" // <--- YE WALA URL
+            databaseURL: "https://udhaarpro-default-rtdb.firebaseio.com/"
         };
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let appData = { customers: [], allTransactions: [], summary: {} };
-        let currentMode = 'existing';
+        let currentMode = 'existing', selectedStatementCust = null;
 
-        // REAL-TIME DATA FETCH
         function refreshData() {
             const icon = document.getElementById('refresh-icon');
             if(icon) icon.classList.add('spin');
@@ -146,29 +220,16 @@
             let customers = {}, allTxns = [], totalRecovered = 0, totalGivenEver = 0;
             Object.keys(rawTxns).forEach(key => {
                 let t = rawTxns[key];
-                if (!customers[t.name]) {
-                    customers[t.name] = { name: t.name, fatherName: t.fatherName, totalUdhaar: 0, totalPaid: 0, balance: 0, history: [] };
-                }
+                if (!customers[t.name]) customers[t.name] = { name: t.name, fatherName: t.fatherName, totalUdhaar: 0, totalPaid: 0, balance: 0, history: [] };
                 let val = Number(t.amount) || 0;
-                if (t.type === 'Udhaar') { 
-                    customers[t.name].totalUdhaar += val; 
-                    customers[t.name].balance += val; 
-                    totalGivenEver += val; 
-                } else { 
-                    customers[t.name].totalPaid += val; 
-                    customers[t.name].balance -= val; 
-                    totalRecovered += val; 
-                }
-                allTxns.push({ ...t, id: key });
-                customers[t.name].history.push({ ...t, id: key });
+                if (t.type === 'Udhaar') { customers[t.name].totalUdhaar += val; customers[t.name].balance += val; totalGivenEver += val; } 
+                else { customers[t.name].totalPaid += val; customers[t.name].balance -= val; totalRecovered += val; }
+                const txnObj = { ...t, id: key };
+                allTxns.push(txnObj); customers[t.name].history.push(txnObj);
             });
             const cList = Object.values(customers).sort((a,b) => a.name.localeCompare(b.name));
-            appData = { 
-                customers: cList, 
-                allTransactions: allTxns.reverse(), 
-                recentTransactions: allTxns.slice(0, 10),
-                summary: { totalGivenEver, marketBalance: cList.reduce((a,b)=>a+(b.balance>0?b.balance:0),0), totalRecovered, totalCustomers: cList.length }
-            };
+            appData = { customers: cList, allTransactions: [...allTxns].reverse(), recentTransactions: allTxns.slice(-10).reverse(),
+                        summary: { totalGivenEver, marketBalance: cList.reduce((a,b)=>a+(b.balance>0?b.balance:0),0), totalRecovered, totalCustomers: cList.length } };
             renderUI(appData);
         }
 
@@ -179,107 +240,171 @@
             document.getElementById('stat-customers').innerText = data.summary.totalCustomers;
             
             document.getElementById('recent-txns').innerHTML = data.recentTransactions.map(t => `
-                <div class="p-5 flex justify-between items-center text-sm font-bold border-b">
-                    <div><p>${t.name}</p><p class="text-[9px] text-slate-400 uppercase">${t.date}</p></div>
+                <div onclick="openReceipt('${t.id}')" class="p-5 flex justify-between items-center text-sm font-bold cursor-pointer hover:bg-slate-50">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 rounded-full ${t.type==='Udhaar'?'bg-rose-50 text-rose-500':'bg-emerald-50 text-emerald-500'}"><i data-lucide="${t.type==='Udhaar'?'arrow-up-right':'arrow-down-left'}" class="w-4 h-4"></i></div>
+                        <div><p>${t.name}</p><p class="text-[9px] text-slate-400 uppercase">${t.date}</p></div>
+                    </div>
                     <p class="${t.type === 'Udhaar' ? 'text-rose-500' : 'text-emerald-600'}">PKR ${Number(t.amount).toLocaleString()}</p>
                 </div>`).join('');
 
             document.getElementById('customer-list-ui').innerHTML = data.customers.map(c => `
-                <div onclick="viewCustomer('${c.name}')" class="bg-white p-6 rounded-[2rem] shadow-sm border-l-8 ${c.balance > 0 ? 'border-l-rose-500' : 'border-l-emerald-500'} cursor-pointer">
-                    <h4 class="font-black text-slate-800">${c.name}</h4>
-                    <p class="text-xl font-black ${c.balance > 0 ? 'text-rose-500' : 'text-emerald-600'}">PKR ${c.balance.toLocaleString()}</p>
+                <div class="bg-white p-6 rounded-[2rem] shadow-sm flex justify-between items-center border-l-8 ${c.balance > 0 ? 'border-l-rose-500' : 'border-l-emerald-500'}">
+                    <div onclick="viewCustomer('${c.name}')" class="flex-1 cursor-pointer">
+                        <h4 class="font-black text-slate-800 text-lg">${c.name} <span class="text-xs font-normal text-slate-400">${c.fatherName ? '('+c.fatherName+')' : ''}</span></h4>
+                        <p class="text-xl font-black ${c.balance > 0 ? 'text-rose-500' : 'text-emerald-600'}">PKR ${c.balance.toLocaleString()}</p>
+                    </div>
+                    <button onclick="confirmDelete('${c.name}')" class="p-3 text-rose-500 hover:bg-rose-50 rounded-2xl"><i data-lucide="trash-2"></i></button>
                 </div>`).join('');
-            
+
+            document.getElementById('full-txn-list').innerHTML = data.allTransactions.map(t => `
+                <div onclick="openReceipt('${t.id}')" class="bg-white p-5 rounded-2xl flex justify-between items-center shadow-sm font-bold text-sm cursor-pointer border border-transparent hover:border-slate-200">
+                    <div><p>${t.name}</p><p class="text-[9px] text-slate-400 uppercase">${t.date} • ${t.type}</p></div>
+                    <p class="${t.type === 'Udhaar' ? 'text-rose-500' : 'text-emerald-600'}">PKR ${Number(t.amount).toLocaleString()}</p>
+                </div>`).join('');
+
             document.getElementById('m-name-select').innerHTML = data.customers.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
             lucide.createIcons();
         }
 
+        // --- RECEIPT & CALC LOGIC ---
+        function openReceipt(txnId) {
+            const txn = appData.allTransactions.find(t => t.id == txnId);
+            if(!txn) return;
+            const cust = appData.customers.find(c => c.name === txn.name);
+            document.getElementById('r-date').innerText = txn.date;
+            document.getElementById('r-name').innerText = txn.name + (txn.fatherName ? ' ('+txn.fatherName+')' : '');
+            document.getElementById('r-type').innerText = txn.type;
+            document.getElementById('r-amount').innerText = "PKR " + Number(txn.amount).toLocaleString();
+            document.getElementById('r-balance').innerText = "PKR " + (cust ? cust.balance.toLocaleString() : '0');
+            document.getElementById('r-desc').innerText = txn.description || '-';
+            document.getElementById('receipt-modal').classList.remove('hidden');
+        }
+
+        function calculateRealTime() {
+            let bal = 0; let name = (currentMode === 'fixed') ? window.tempFixedName : (currentMode === 'existing' ? document.getElementById('m-name-select').value : "");
+            const c = appData.customers.find(x => x.name === name); if(c) bal = c.balance;
+            const amt = Number(document.getElementById('m-amount').value) || 0;
+            const res = (document.getElementById('m-type').value === 'Udhaar') ? (bal + amt) : (bal - amt);
+            document.getElementById('calc-preview').innerText = "PKR " + res.toLocaleString();
+        }
+
+        function saveCustomerEdit() {
+            const oldN = document.getElementById('edit-old-name').value;
+            const newN = document.getElementById('edit-new-name').value;
+            const newF = document.getElementById('edit-new-father').value;
+            const updates = {};
+            appData.allTransactions.filter(t => t.name === oldN).forEach(t => {
+                updates[`/transactions/${t.id}/name`] = newN;
+                updates[`/transactions/${t.id}/fatherName`] = newF;
+            });
+            db.ref().update(updates).then(() => { closeEditModal(); refreshData(); showTab('customers'); });
+        }
+
+        // --- UI UTILS ---
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.getElementById('back-btn').classList.toggle('hidden', id !== 'customer-profile');
+            document.getElementById('app-title').innerText = id.toUpperCase();
+            lucide.createIcons();
         }
 
-        function openEntryModal(mode) {
-            currentMode = mode;
-            document.getElementById('modal').classList.remove('hidden');
+        function openEntryModal(mode, fixedName = null) {
+            currentMode = mode; document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('txnForm').reset(); setType('Udhaar');
+            document.getElementById('name-input-container').classList.toggle('hidden', mode === 'new' || mode === 'fixed');
             document.getElementById('new-name-container').classList.toggle('hidden', mode !== 'new');
-            document.getElementById('name-input-container').classList.toggle('hidden', mode === 'new');
-        }
-
-        function setType(t) { 
-            document.getElementById('m-type').value = t;
-            document.getElementById('btn-udhaar').className = t === 'Udhaar' ? 'p-4 rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-700 font-bold' : 'p-4 rounded-xl border-2 border-slate-100 font-bold text-slate-400';
-            document.getElementById('btn-paid').className = t === 'Paid' ? 'p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 font-bold' : 'p-4 rounded-xl border-2 border-slate-100 font-bold text-slate-400';
+            if(mode === 'fixed') { document.getElementById('modal-title-text').innerText = fixedName; window.tempFixedName = fixedName; }
+            else { document.getElementById('modal-title-text').innerText = (mode==='new'?"New Customer":"Add Record"); }
+            calculateRealTime();
         }
 
         document.getElementById('txnForm').onsubmit = (e) => {
             e.preventDefault();
-            const btn = document.getElementById('saveBtn');
-            btn.innerText = "Saving..."; btn.disabled = true;
-            
-            let name = (currentMode === 'new') ? document.getElementById('m-name-text').value : document.getElementById('m-name-select').value;
-            let father = (currentMode === 'new') ? document.getElementById('m-father-name').value : "";
-
-            const data = { 
-                name: name, 
-                fatherName: father,
-                amount: document.getElementById('m-amount').value, 
-                type: document.getElementById('m-type').value, 
-                description: document.getElementById('m-desc').value,
-                date: new Date().toLocaleDateString('en-GB'),
-                timestamp: Date.now()
-            };
-
-            db.ref('transactions').push(data).then(() => {
-                document.getElementById('modal').classList.add('hidden');
-                e.target.reset();
-                btn.innerText = "Confirm & Save"; btn.disabled = false;
-            });
+            const btn = document.getElementById('saveBtn'); btn.innerText = "Saving..."; btn.disabled = true;
+            let n = (currentMode === 'fixed') ? window.tempFixedName : (currentMode === 'new' ? document.getElementById('m-name-text').value : document.getElementById('m-name-select').value);
+            let f = (currentMode === 'new') ? document.getElementById('m-father-name').value : (appData.customers.find(c=>c.name===n)?.fatherName || "");
+            const data = { name: n, fatherName: f, amount: document.getElementById('m-amount').value, type: document.getElementById('m-type').value, description: document.getElementById('m-desc').value, date: new Date().toLocaleDateString('en-GB'), timestamp: Date.now() };
+            db.ref('transactions').push(data).then(() => { closeModal(); e.target.reset(); btn.innerText = "Confirm & Save"; btn.disabled = false; });
         };
 
+        // --- Baki functions (PDF, Search, Modal) wahi purani logic ---
+        function generatePDF() {
+            const start = document.getElementById('start-date').value; const end = document.getElementById('end-date').value;
+            if(!start || !end) return alert("Select dates");
+            const cust = appData.customers.find(c => c.name === selectedStatementCust);
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            doc.setFontSize(20); doc.text("UdhaarPro Statement", 15, 20);
+            doc.setFontSize(10); doc.text(`Customer: ${cust.name} | Period: ${start} to ${end}`, 15, 30);
+            const body = cust.history.map(t => [t.date, t.type, t.description || '-', t.amount.toLocaleString()]);
+            doc.autoTable({ startY: 40, head: [['Date', 'Type', 'Description', 'Amount']], body: body, headStyles: {fillColor:[6,78,59]} });
+            doc.save(`${cust.name}_Statement.pdf`);
+        }
+
+        function downloadCSV() {
+            const cust = appData.customers.find(c => c.name === selectedStatementCust);
+            let csv = "Date,Type,Amount,Description\n";
+            cust.history.forEach(t => { csv += `${t.date},${t.type},${t.amount},"${t.description || ''}"\n`; });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `${cust.name}.csv`; a.click();
+        }
+
+        function filterStatementList() {
+            const q = document.getElementById('statement-search').value.toLowerCase();
+            const dropdown = document.getElementById('statement-dropdown');
+            dropdown.classList.remove('hidden');
+            dropdown.innerHTML = appData.customers.filter(c => c.name.toLowerCase().includes(q)).map(c => `<div onclick="selectStatementCust('${c.name}')" class="p-4 hover:bg-emerald-50 border-b cursor-pointer font-bold">${c.name}</div>`).join('');
+        }
+        function selectStatementCust(n) { selectedStatementCust = n; document.getElementById('selected-cust-name').innerText = "Selected: " + n; document.getElementById('date-range-box').classList.remove('hidden'); document.getElementById('statement-dropdown').classList.add('hidden'); }
+        function resetStatementSelection() { document.getElementById('date-range-box').classList.add('hidden'); document.getElementById('statement-search').classList.remove('hidden'); }
+        function setType(t) { document.getElementById('m-type').value = t; setTypeStyles(t); calculateRealTime(); }
+        function setTypeStyles(t) { document.getElementById('btn-udhaar').className = t === 'Udhaar' ? 'p-4 rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-700 font-bold' : 'p-4 rounded-xl border-2 border-slate-100 font-black text-slate-400'; document.getElementById('btn-paid').className = t === 'Paid' ? 'p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 font-black' : 'p-4 rounded-xl border-2 border-slate-100 font-black text-slate-400'; }
         function viewCustomer(name) {
-            const c = appData.customers.find(x => x.name === name);
-            if(!c) return;
+            const c = appData.customers.find(x => x.name === name); if(!c) return;
             showTab('customer-profile');
             document.getElementById('profile-detail-view').innerHTML = `
-                <div class="bg-[#064e3b] p-8 rounded-[2.5rem] text-white shadow-xl mb-6">
-                    <h2 class="text-3xl font-black mb-1">${c.name}</h2>
-                    <p class="opacity-60 font-bold">${c.fatherName ? 'S/O ' + c.fatherName : ''}</p>
-                    <div class="grid grid-cols-2 gap-4 mt-8">
-                        <div class="bg-white/10 p-4 rounded-2xl"><p class="text-[10px] uppercase opacity-60">Paid Back</p><p class="font-bold">${c.totalPaid.toLocaleString()}</p></div>
-                        <div class="bg-white/20 p-4 rounded-2xl border border-white/10"><p class="text-[10px] uppercase opacity-60">Balance</p><p class="text-xl font-black">${c.balance.toLocaleString()}</p></div>
+                <div class="bg-[#064e3b] p-8 rounded-[2.5rem] text-white shadow-xl mb-6 relative">
+                    <button onclick="openEditModal('${c.name}', '${c.fatherName}')" class="absolute top-8 right-8 p-3 bg-white/10 rounded-full"><i data-lucide="edit-3" class="w-5 h-5"></i></button>
+                    <h2 class="text-3xl font-black mb-1">${c.name}</h2><p class="text-white/60 mb-8 font-bold">${c.fatherName ? 'S/O ' + c.fatherName : ''}</p>
+                    <div class="grid grid-cols-3 gap-2 text-center text-[10px] font-bold">
+                        <div class="bg-white/10 p-3 rounded-2xl">Taken<br>${c.totalUdhaar.toLocaleString()}</div>
+                        <div class="bg-white/10 p-3 rounded-2xl">Paid<br>${c.totalPaid.toLocaleString()}</div>
+                        <div class="bg-white/20 p-3 rounded-2xl border border-white/10 text-emerald-300">Bal<br>${c.balance.toLocaleString()}</div>
                     </div>
+                    <button onclick="openEntryModal('fixed', '${c.name}')" class="w-full bg-white text-[#064e3b] py-4 rounded-2xl font-black mt-8 shadow-lg uppercase">Add New Record</button>
                 </div>
-                <div class="bg-white rounded-[2rem] border overflow-hidden">
-                    <div class="p-5 font-black border-b">Transaction History</div>
+                <div class="bg-white rounded-[2rem] shadow-sm border overflow-hidden">
+                    <div class="p-5 font-black border-b text-slate-700">History Log</div>
                     <div class="divide-y">${c.history.slice().reverse().map(h => `
-                        <div class="p-4 flex justify-between items-center text-sm">
-                            <div><p class="font-bold">${h.date}</p><p class="text-[10px] text-slate-400">${h.description || ''}</p></div>
-                            <p class="${h.type==='Udhaar'?'text-rose-500':'text-emerald-600'} font-bold">${h.type==='Udhaar'?'+':'-'} ${Number(h.amount).toLocaleString()}</p>
-                        </div>`).join('')}
-                    </div>
+                        <div onclick="openReceipt('${h.id}')" class="p-4 flex justify-between items-center text-sm font-bold cursor-pointer">
+                            <div><p class="text-xs uppercase">${h.date}</p><p class="text-[10px] text-slate-400 font-normal">${h.description || ''}</p></div>
+                            <p class="${h.type==='Udhaar'?'text-rose-500':'text-emerald-600'}">${h.type==='Udhaar'?'+':'-'} PKR ${h.amount.toLocaleString()}</p>
+                        </div>`).join('')}</div>
                 </div>`;
+            lucide.createIcons();
         }
-
-        function toggleSearch() {
-            const el = document.getElementById('search-popup');
-            el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
-        }
-
+        function openEditModal(n, f) { document.getElementById('edit-old-name').value = n; document.getElementById('edit-new-name').value = n; document.getElementById('edit-new-father').value = f || ""; document.getElementById('edit-modal').classList.remove('hidden'); }
+        function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+        function closeReceipt() { document.getElementById('receipt-modal').classList.add('hidden'); }
+        function toggleSearch() { const el = document.getElementById('search-popup'); el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none'; }
         function filterSearch() {
             const q = document.getElementById('search-input').value.toLowerCase();
-            const res = document.getElementById('search-results'); 
-            if(!q) return res.innerHTML = '';
-            const fil = appData.customers.filter(c => c.name.toLowerCase().includes(q));
-            res.innerHTML = fil.map(c => `
-                <div onclick="toggleSearch(); viewCustomer('${c.name}')" class="p-4 bg-slate-50 rounded-2xl font-bold flex justify-between items-center border cursor-pointer">
-                    <p>${c.name}</p><i data-lucide="chevron-right" class="w-4 h-4"></i>
+            const res = document.getElementById('search-results'); if(!q) return res.innerHTML = '';
+            res.innerHTML = appData.customers.filter(c => c.name.toLowerCase().includes(q) || (c.fatherName && c.fatherName.toLowerCase().includes(q))).map(c => `
+                <div onclick="toggleSearch(); viewCustomer('${c.name}')" class="p-5 bg-slate-50 rounded-2xl font-bold flex justify-between items-center border cursor-pointer">
+                    <div><p>${c.name}</p><p class="text-[10px] text-slate-400">Balance: PKR ${c.balance.toLocaleString()}</p></div><i data-lucide="chevron-right"></i>
                 </div>`).join('');
             lucide.createIcons();
         }
-
-        window.onload = () => { refreshData(); lucide.createIcons(); };
+        function confirmDelete(n) { if(confirm("Delete " + n + "?")) { const updates = {}; appData.allTransactions.filter(t=>t.name===n).forEach(t=> updates[`/transactions/${t.id}`] = null); db.ref().update(updates); } }
+        function openChoiceModal() { document.getElementById('choice-modal').classList.remove('hidden'); }
+        function closeChoiceModal() { document.getElementById('choice-modal').classList.add('hidden'); }
+        function handleChoice(m) { closeChoiceModal(); openEntryModal(m); }
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+        window.onclick = (e) => { if(!e.target.closest('#statement-search') && !e.target.closest('#statement-dropdown')) document.getElementById('statement-dropdown').classList.add('hidden'); };
+        window.onload = () => { lucide.createIcons(); refreshData(); };
     </script>
 </body>
 </html>
