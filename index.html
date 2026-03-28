@@ -629,9 +629,9 @@
 
 
 
-// --- GLOBAL REPORT FUNCTIONS (Overall Business History) ---
+// --- NEW GLOBAL SUMMARY REPORT FUNCTIONS ---
 
-function getFilteredGlobalData() {
+function getAggregatedGlobalData() {
     const start = document.getElementById('global-start-date').value;
     const end = document.getElementById('global-end-date').value;
     
@@ -641,54 +641,98 @@ function getFilteredGlobalData() {
     const endDate = new Date(end);
     endDate.setHours(23, 59, 59); // Poora din cover karne ke liye
 
-    // Filter all transactions based on selected date
-    return appData.allTransactions.filter(t => {
+    const customerSummary = {};
+
+    // Transactions ko filter aur calculate karna
+    appData.allTransactions.forEach(t => {
         const [d, m, y] = t.date.split('/');
         const txnDate = new Date(`${y}-${m}-${d}`);
-        return txnDate >= startDate && txnDate <= endDate;
-    }).sort((a, b) => a.timestamp - b.timestamp); // Purani pehle, nai baad mein
+
+        // Agar transaction select ki gayi dates ke darmiyan hai
+        if (txnDate >= startDate && txnDate <= endDate) {
+            const key = t.name; // Customer ke naam se group karna
+
+            if (!customerSummary[key]) {
+                customerSummary[key] = {
+                    name: t.name,
+                    fatherName: t.fatherName || '---',
+                    totalUdhaar: 0,
+                    totalPaid: 0,
+                    countUdhaar: 0,
+                    countPaid: 0
+                };
+            }
+
+            const val = Number(t.amount) || 0;
+            if (t.type === 'Udhaar') {
+                customerSummary[key].totalUdhaar += val;
+                customerSummary[key].countUdhaar += 1;
+            } else {
+                customerSummary[key].totalPaid += val;
+                customerSummary[key].countPaid += 1;
+            }
+        }
+    });
+
+    return Object.values(customerSummary);
 }
 
 function generateGlobalPDF() {
-    const data = getFilteredGlobalData();
-    if(!data || data.length === 0) { alert("Is date range mein koi record nahi mila"); return; }
+    const data = getAggregatedGlobalData();
+    if(!data || data.length === 0) { alert("Is date range mein koi user active nahi mila"); return; }
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    const doc = new jsPDF('p', 'mm', 'a4'); // A4 size page
     
-    doc.setFontSize(20);
-    doc.text("UdhaarPro - Overall Business Report", 15, 20);
+    doc.setFontSize(18);
+    doc.text("UdhaarPro - Active Customers Summary", 15, 20);
     
     doc.setFontSize(10);
     doc.text(`Report Period: ${document.getElementById('global-start-date').value} to ${document.getElementById('global-end-date').value}`, 15, 28);
-    doc.text(`Total Transactions: ${data.length}`, 15, 33);
+    doc.text(`Total Active Customers: ${data.length}`, 15, 33);
 
-    const tableBody = data.map(t => [t.date, t.name, t.type, t.amount.toLocaleString()]);
+    // PDF ke liye Table ka data tayyar karna
+    const tableBody = data.map((c, index) => {
+        const remaining = c.totalUdhaar - c.totalPaid;
+        return [
+            index + 1, // Serial Number
+            c.name,
+            c.fatherName,
+            c.totalUdhaar.toLocaleString(),
+            c.totalPaid.toLocaleString(),
+            remaining.toLocaleString(),
+            `U:${c.countUdhaar} / P:${c.countPaid}` // Total Transactions
+        ];
+    });
     
     doc.autoTable({
         startY: 40,
-        head: [['Date', 'Customer Name', 'Type', 'Amount (PKR)']],
+        head: [['S.No', 'Customer Name', 'Father Name', 'Total Udhaar', 'Total Paid', 'Remaining', 'Txn Count']],
         body: tableBody,
         theme: 'striped',
-        headStyles: { fillColor: [6, 78, 59] } // Dark Green / Emerald color
+        headStyles: { fillColor: [6, 78, 59] }, // Dark Green color
+        styles: { fontSize: 9 }
     });
 
-    doc.save(`Business_Report_${Date.now()}.pdf`);
+    doc.save(`Admin_Summary_Report_${Date.now()}.pdf`);
 }
 
 function downloadGlobalCSV() {
-    const data = getFilteredGlobalData();
+    const data = getAggregatedGlobalData();
     if(!data || data.length === 0) { alert("No records found"); return; }
 
-    let csv = "Date,Customer Name,Type,Amount,Description\n";
-    data.forEach(t => {
-        csv += `${t.date},"${t.name}",${t.type},${t.amount},"${t.description || ''}"\n`;
+    // CSV ki Pehli line (Headers)
+    let csv = "S.No,Customer Name,Father Name,Total Udhaar,Total Paid,Remaining,Udhaar Count,Paid Count\n";
+    
+    data.forEach((c, index) => {
+        const remaining = c.totalUdhaar - c.totalPaid;
+        csv += `${index + 1},"${c.name}","${c.fatherName}",${c.totalUdhaar},${c.totalPaid},${remaining},${c.countUdhaar},${c.countPaid}\n`;
     });
 
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `Business_History_${Date.now()}.csv`;
+    a.download = `Admin_Summary_${Date.now()}.csv`;
     a.click();
 }
 
