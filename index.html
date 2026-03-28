@@ -305,6 +305,7 @@
                 <div class="space-y-4">
                     <div class="flex justify-between"><span>Date:</span><span id="r-date" class="font-bold"></span></div>
                     <div class="flex justify-between"><span>Customer:</span><span id="r-name" class="font-bold"></span></div>
+                    <div class="flex justify-between"><span>Father Name:</span><span id="r-father" class="font-bold"></span></div>
                     <div class="flex justify-between border-t pt-4"><span>Type:</span><span id="r-type" class="font-bold uppercase"></span></div>
                     <div class="flex justify-between"><span>Amount:</span><span id="r-amount" class="font-black text-lg"></span></div>
                     <div class="flex justify-between border-t pt-4"><span>Note:</span><span id="r-desc-val" class="font-medium italic text-slate-600"></span></div>
@@ -437,16 +438,19 @@
             // Full Transaction Records Tab (FIXED: Added Description Here)
             document.getElementById('full-txn-list').innerHTML = data.allTransactions.map(t => `
                 <div onclick="openReceipt('${t.id}')" class="bg-white p-5 rounded-2xl flex justify-between items-center shadow-sm font-bold text-sm cursor-pointer border hover:border-slate-200">
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2">
-                            <p class="text-slate-800">${t.name}</p>
-                            <span class="text-[8px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 uppercase tracking-tighter">${t.type}</span>
-                        </div>
-                        <p class="text-[9px] text-slate-400 uppercase">${t.date}</p>
-                        ${t.description ? `<p class="text-[10px] text-slate-500 font-medium italic mt-1 border-l-2 border-emerald-100 pl-2">Note: ${t.description}</p>` : ''}
-                    </div>
-                    <p class="${t.type==='Udhaar'?'text-rose-500':'text-emerald-600'} shrink-0 ml-4">PKR ${Number(t.amount).toLocaleString()}</p>
-                </div>`).join('');
+        <div class="flex-1">
+            <div class="flex items-center gap-2">
+                <div>
+                    <p class="text-slate-800">${t.name}</p>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase">S/O: ${t.fatherName || 'N/A'}</p>
+                </div>
+                <span class="text-[8px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 uppercase tracking-tighter">${t.type}</span>
+            </div>
+            <p class="text-[9px] text-slate-400 uppercase mt-1">${t.date}</p>
+            ${t.description ? `<p class="text-[10px] text-slate-500 font-medium italic mt-1 border-l-2 border-emerald-100 pl-2">Note: ${t.description}</p>` : ''}
+        </div>
+        <p class="${t.type==='Udhaar'?'text-rose-500':'text-emerald-600'} shrink-0 ml-4">PKR ${Number(t.amount).toLocaleString()}</p>
+    </div>`).join('');
 
             document.getElementById('m-name-select').innerHTML = data.customers.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
             lucide.createIcons();
@@ -562,16 +566,18 @@
 
         // --- RECEIPT MODAL LOGIC (FIXED: Added Description) ---
         function openReceipt(txnId) {
-            const t = appData.allTransactions.find(x => x.id == txnId); if(!t) return;
-            const c = appData.customers.find(x => x.name === t.name);
-            document.getElementById('r-date').innerText = t.date;
-            document.getElementById('r-name').innerText = t.name;
-            document.getElementById('r-type').innerText = t.type;
-            document.getElementById('r-amount').innerText = "PKR " + Number(t.amount).toLocaleString();
-            document.getElementById('r-desc-val').innerText = t.description ? t.description : "-";
-            document.getElementById('r-balance').innerText = "PKR " + (c ? c.balance.toLocaleString() : '0');
-            document.getElementById('receipt-modal').classList.remove('hidden');
-        }
+    const t = appData.allTransactions.find(x => x.id == txnId); if(!t) return;
+    const c = appData.customers.find(x => x.name === t.name);
+    
+    document.getElementById('r-date').innerText = t.date;
+    document.getElementById('r-name').innerText = t.name;
+    document.getElementById('r-father').innerText = t.fatherName || "-"; // Ye line add ki gayi hai
+    document.getElementById('r-type').innerText = t.type;
+    document.getElementById('r-amount').innerText = "PKR " + Number(t.amount).toLocaleString();
+    document.getElementById('r-desc-val').innerText = t.description ? t.description : "-";
+    document.getElementById('r-balance').innerText = "PKR " + (c ? c.balance.toLocaleString() : '0');
+    document.getElementById('receipt-modal').classList.remove('hidden');
+}
 
         function setType(t) { document.getElementById('m-type').value = t; document.getElementById('btn-udhaar').className = t==='Udhaar'?'p-4 rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-700 font-bold':'p-4 rounded-xl border-2 border-slate-100 font-black text-slate-400'; document.getElementById('btn-paid').className = t==='Paid'?'p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 font-bold':'p-4 rounded-xl border-2 border-slate-100 font-black text-slate-400'; calculateRealTime(); }
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
