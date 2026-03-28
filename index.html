@@ -30,6 +30,7 @@
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
         #search-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 3000; display: none; }
         @media print { body * { visibility: hidden; } #receipt-printable, #receipt-printable * { visibility: visible; } #receipt-printable { position: absolute; left: 0; top: 0; width: 100%; } .no-print { display: none; } }
+        
     </style>
 </head>
 <body class="overflow-hidden">
@@ -40,7 +41,7 @@
             <div class="mb-6">
                 <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 icon-3d"><i data-lucide="shield-check" class="w-8 h-8"></i></div>
                 <h2 class="text-2xl font-black text-slate-800 tracking-tight">App Locked</h2>
-                <p id="lock-status" class="text-slate-400 text-sm">Validating Firebase Connection...</p>
+                <p id="lock-status" class="text-slate-400 text-sm">Validating Lock Connection...</p>
             </div>
             <div id="pin-inputs" class="flex justify-center gap-3 mb-6 hidden">
                 <input type="password" maxlength="1" class="digit-input" id="d1" onkeyup="moveTab(this, 'd2')" inputmode="numeric">
@@ -89,7 +90,6 @@
 
         <!-- DASHBOARD TAB -->
         <section id="dashboard" class="tab-content active space-y-8">
-            <!-- Desktop Grid -->
             <div class="hidden md:grid md:grid-cols-4 md:gap-6">
                 <div class="bg-indigo-600 p-8 rounded-xl text-white shadow-lg relative overflow-hidden flex flex-col justify-between">
                     <p class="text-[10px] font-bold opacity-70 uppercase">Total Given</p><h3 id="stat-given" class="text-lg font-black mt-2">PKR 0</h3>
@@ -109,26 +109,40 @@
                 </div>
             </div>
 
-            <!-- Mobile Layout -->
             <div class="md:hidden space-y-4">
-                <div class="bg-gradient-to-br from-emerald-800 to-emerald-950 rounded-[2rem] p-6 text-white shadow-2xl relative overflow-hidden">
-                    <div class="flex relative z-10">
-                        <div class="flex-1 border-r border-white/20 pr-4">
-                            <p class="text-[10px] font-bold opacity-60 uppercase mb-1">Total Given</p><h3 id="stat-given-m" class="text-lg font-black">PKR 0</h3>
-                        </div>
-                        <div class="flex-1 pl-6">
-                            <p class="text-[10px] font-bold opacity-60 uppercase mb-1">Remaining</p><h3 id="stat-udhaar-m" class="text-lg font-black text-rose-300 tracking-tighter">PKR 0</h3>
-                        </div>
-                    </div>
-                </div>
+               <div class="bg-gradient-to-br from-emerald-800 to-emerald-900 rounded-[1rem] p-6 text-white shadow-2xl relative overflow-hidden">
+    <div class="flex relative z-10 items-center">
+        <!-- Total Given Column -->
+        <div class="flex-1 border-r border-white/20 pr-4 flex items-center gap-3">
+            <div class="p-2.5 bg-white/10 rounded-xl icon-3d text-emerald-400">
+                <i data-lucide="trending-up" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold opacity-60 uppercase mb-0.5">Total Given</p>
+                <h3 id="stat-given-m" class="text-sm font-black">PKR 0</h3>
+            </div>
+        </div>
+        
+        <!-- Remaining Column -->
+        <div class="flex-1 pl-6 flex items-center gap-3">
+            <div class="p-2.5 bg-white/10 rounded-xl icon-3d text-rose-300">
+                <i data-lucide="clock" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold opacity-60 uppercase mb-0.5">Remaining</p>
+                <h3 id="stat-udhaar-m" class="text-sm font-black text-rose-300 tracking-tighter">PKR 0</h3>
+            </div>
+        </div>
+    </div>
+</div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-white p-5 rounded-[2rem] border shadow-sm flex flex-col items-center">
                         <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl icon-3d mb-2"><i data-lucide="check-circle-2" class="w-6 h-6"></i></div>
-                        <p class="text-[9px] font-black text-slate-400 uppercase">Collected</p><h3 id="stat-recovered-m" class="text-sm font-black">0</h3>
+                        <p class="text-[10px] font-black text-slate-400 uppercase">Collected</p><h3 id="stat-recovered-m" class="text-sm font-black">0</h3>
                     </div>
                     <div class="bg-white p-5 rounded-[2rem] border shadow-sm flex flex-col items-center">
                         <div class="p-3 bg-amber-50 text-amber-600 rounded-2xl icon-3d mb-2"><i data-lucide="users" class="w-6 h-6"></i></div>
-                        <p class="text-[9px] font-black text-slate-400 uppercase">Clients</p><h3 id="stat-customers-m" class="text-sm font-black">0</h3>
+                        <p class="text-[10px] font-black text-slate-400 uppercase">Clients</p><h3 id="stat-customers-m" class="text-sm font-black">0</h3>
                     </div>
                 </div>
             </div>
@@ -147,6 +161,8 @@
         <!-- OTHER TABS -->
         <section id="customers" class="tab-content space-y-4"><div id="customer-list-ui" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div></section>
         <section id="customer-profile" class="tab-content space-y-6"><div id="profile-detail-view"></div></section>
+        
+        <!-- RECORDS TAB (FULL TRANSACTION LIST) -->
         <section id="transactions" class="tab-content space-y-4"><div id="full-txn-list" class="space-y-3"></div></section>
 
         <!-- SETTINGS TAB -->
@@ -167,7 +183,6 @@
                     </button>
                 </div>
 
-                <!-- Settings Detail Panels -->
                 <div id="set-statement" class="hidden bg-white p-8 rounded-[2rem] border shadow-lg space-y-4">
                     <button onclick="toggleSettings('menu')" class="text-xs font-black text-emerald-600 uppercase flex items-center gap-1"><i data-lucide="arrow-left" class="w-3 h-3"></i> Back</button>
                     <input type="text" id="statement-search" onfocus="filterStatementList()" onkeyup="filterStatementList()" placeholder="Select customer..." class="w-full p-4 bg-slate-50 rounded-xl font-bold border outline-none">
@@ -190,12 +205,13 @@
                     <p id="pin-reset-msg" class="text-[10px] text-center font-bold hidden uppercase"></p>
                 </div>
 
-                <div id="set-dev" class="hidden bg-slate-900 p-8 rounded-[2.5rem] text-white text-center">
+                <div id="set-dev" class="hidden bg-slate-900 p-8 rounded-[1.0rem] text-white text-center">
                     <div class="w-20 h-20 bg-white/10 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-white/10 icon-3d"><i data-lucide="shield-check" class="w-10 h-10 text-emerald-400"></i></div>
                     <h3 class="text-xl font-black uppercase tracking-tighter">UdhaarPro v10</h3>
-                    <p class="text-slate-400 text-xs mt-1 uppercase tracking-widest font-bold">Smart Debt Manager</p>
-                    <p class="mt-8 text-sm text-slate-400">Developed by <span class="text-emerald-400 font-bold">M.S.B</span></p>
-                    <button onclick="toggleSettings('menu')" class="mt-8 text-white font-black text-[10px] uppercase border-b border-white/20">Back to settings</button>
+                    <p class="text-slate-400 text-xs mt-1 uppercase tracking-widest font-bold">Smart Loan/Udhaar Manager</p>
+                    <p class="mt-8 text-sm text-slate-400">Developed by <span class="text-emerald-400 font-bold">MAS Coders</span></p>
+                    <p class="mt-8 text-sm text-slate-400">Developed What's App Contact <span class="text-emerald-400 font-bold">+923090090318</span></p>
+                    <button onclick="toggleSettings('menu')" class="mt-8 text-white font-black text-[16px] uppercase border-b border-white/20">Back to settings</button>
                 </div>
             </div>
         </section>
@@ -248,7 +264,7 @@
         </div>
     </div>
 
-    <!-- RECEIPT & CHOICE MODALS (Keeping original) -->
+    <!-- RECEIPT MODAL -->
     <div id="receipt-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-[5000] hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl">
             <div id="receipt-printable" class="p-8 bg-white text-sm">
@@ -258,6 +274,7 @@
                     <div class="flex justify-between"><span>Customer:</span><span id="r-name" class="font-bold"></span></div>
                     <div class="flex justify-between border-t pt-4"><span>Type:</span><span id="r-type" class="font-bold uppercase"></span></div>
                     <div class="flex justify-between"><span>Amount:</span><span id="r-amount" class="font-black text-lg"></span></div>
+                    <div class="flex justify-between border-t pt-4"><span>Note:</span><span id="r-desc-val" class="font-medium italic text-slate-600"></span></div>
                     <div class="flex justify-between border-t pt-4 bg-slate-50 p-2 rounded-lg font-black text-rose-600"><span>Final Bal:</span><span id="r-balance"></span></div>
                 </div>
             </div>
@@ -265,6 +282,7 @@
         </div>
     </div>
 
+    <!-- CHOICE MODAL -->
     <div id="choice-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[2500] hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl relative">
             <button onclick="closeChoiceModal()" class="absolute top-6 right-6 p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -369,9 +387,34 @@
             ['stat-recovered','stat-recovered-m'].forEach(i => document.getElementById(i).innerText = fR);
             ['stat-customers','stat-customers-m'].forEach(i => document.getElementById(i).innerText = data.summary.totalCustomers);
             
-            document.getElementById('recent-txns').innerHTML = data.recentTransactions.map(t => `<div onclick="openReceipt('${t.id}')" class="p-5 flex justify-between items-center text-sm font-bold cursor-pointer hover:bg-slate-50"><div><p>${t.name}</p><p class="text-[9px] text-slate-400 uppercase">${t.date}</p></div><p class="${t.type==='Udhaar'?'text-rose-500':'text-emerald-600'}">PKR ${Number(t.amount).toLocaleString()}</p></div>`).join('');
+            // Recent Log on Dashboard
+            document.getElementById('recent-txns').innerHTML = data.recentTransactions.map(t => `
+                <div onclick="openReceipt('${t.id}')" class="p-5 flex justify-between items-center text-sm font-bold cursor-pointer hover:bg-slate-50">
+                    <div>
+                        <p>${t.name}</p>
+                        <p class="text-[9px] text-slate-400 uppercase">${t.date}</p>
+                        ${t.description ? `<p class="text-[8px] text-slate-400 italic font-normal">${t.description}</p>` : ''}
+                    </div>
+                    <p class="${t.type==='Udhaar'?'text-rose-500':'text-emerald-600'}">PKR ${Number(t.amount).toLocaleString()}</p>
+                </div>`).join('');
+
+            // Customer List
             document.getElementById('customer-list-ui').innerHTML = data.customers.map(c => `<div class="bg-white p-6 rounded-[2rem] shadow-sm border-l-8 ${c.balance>0?'border-l-rose-500':'border-l-emerald-500'} flex justify-between items-center"><div onclick="viewCustomer('${c.name}')" class="flex-1 cursor-pointer"><h4 class="font-black text-slate-800 text-lg">${c.name}</h4><p class="text-xl font-black ${c.balance>0?'text-rose-500':'text-emerald-600'}">PKR ${c.balance.toLocaleString()}</p></div><button onclick="confirmDelete('${c.name}')" class="p-3 text-rose-500"><i data-lucide="trash-2"></i></button></div>`).join('');
-            document.getElementById('full-txn-list').innerHTML = data.allTransactions.map(t => `<div onclick="openReceipt('${t.id}')" class="bg-white p-5 rounded-2xl flex justify-between items-center shadow-sm font-bold text-sm cursor-pointer border hover:border-slate-200"><div><p>${t.name}</p><p class="text-[9px] text-slate-400 uppercase">${t.date} • ${t.type}</p></div><p class="${t.type==='Udhaar'?'text-rose-500':'text-emerald-600'}">PKR ${Number(t.amount).toLocaleString()}</p></div>`).join('');
+            
+            // Full Transaction Records Tab (FIXED: Added Description Here)
+            document.getElementById('full-txn-list').innerHTML = data.allTransactions.map(t => `
+                <div onclick="openReceipt('${t.id}')" class="bg-white p-5 rounded-2xl flex justify-between items-center shadow-sm font-bold text-sm cursor-pointer border hover:border-slate-200">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <p class="text-slate-800">${t.name}</p>
+                            <span class="text-[8px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 uppercase tracking-tighter">${t.type}</span>
+                        </div>
+                        <p class="text-[9px] text-slate-400 uppercase">${t.date}</p>
+                        ${t.description ? `<p class="text-[10px] text-slate-500 font-medium italic mt-1 border-l-2 border-emerald-100 pl-2">Note: ${t.description}</p>` : ''}
+                    </div>
+                    <p class="${t.type==='Udhaar'?'text-rose-500':'text-emerald-600'} shrink-0 ml-4">PKR ${Number(t.amount).toLocaleString()}</p>
+                </div>`).join('');
+
             document.getElementById('m-name-select').innerHTML = data.customers.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
             lucide.createIcons();
         }
@@ -484,6 +527,7 @@
             db.ref('transactions').push(data).then(() => { closeModal(); e.target.reset(); });
         };
 
+        // --- RECEIPT MODAL LOGIC (FIXED: Added Description) ---
         function openReceipt(txnId) {
             const t = appData.allTransactions.find(x => x.id == txnId); if(!t) return;
             const c = appData.customers.find(x => x.name === t.name);
@@ -491,6 +535,7 @@
             document.getElementById('r-name').innerText = t.name;
             document.getElementById('r-type').innerText = t.type;
             document.getElementById('r-amount').innerText = "PKR " + Number(t.amount).toLocaleString();
+            document.getElementById('r-desc-val').innerText = t.description ? t.description : "-";
             document.getElementById('r-balance').innerText = "PKR " + (c ? c.balance.toLocaleString() : '0');
             document.getElementById('receipt-modal').classList.remove('hidden');
         }
