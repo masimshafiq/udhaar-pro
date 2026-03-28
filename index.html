@@ -388,7 +388,7 @@
             if(CryptoJS.SHA256(oldP).toString() === currentPinHash) {
                 const newHash = CryptoJS.SHA256(newP).toString();
                 db.ref('settings/pinHash').set(newHash).then(() => {
-                    currentPinHash = newHash; msg.innerText = "PIN Updated!"; msg.className = "text-emerald-500 font-bold block mt-2 uppercase text-[10px]"; msg.classList.remove('hidden');
+                    currentPinHash = newHash; msg.innerText = "PIN Updated!"; msg.className = "text-emerald-500 font-bold block mt-2 uppercase text-[15px]"; msg.classList.remove('hidden');
                 });
             } else { msg.innerText = "Wrong Current PIN!"; msg.className = "text-rose-500 font-bold block mt-2 uppercase text-[10px]"; msg.classList.remove('hidden'); }
         }
