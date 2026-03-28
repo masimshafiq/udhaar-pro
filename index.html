@@ -423,17 +423,31 @@
             
             // Recent Log on Dashboard
             document.getElementById('recent-txns').innerHTML = data.recentTransactions.map(t => `
-                <div onclick="openReceipt('${t.id}')" class="p-5 flex justify-between items-center text-sm font-bold cursor-pointer hover:bg-slate-50">
-                    <div>
-                        <p>${t.name}</p>
-                        <p class="text-[9px] text-slate-400 uppercase">${t.date}</p>
-                        ${t.description ? `<p class="text-[8px] text-slate-400 italic font-normal">${t.description}</p>` : ''}
-                    </div>
-                    <p class="${t.type==='Udhaar'?'text-rose-500':'text-emerald-600'}">PKR ${Number(t.amount).toLocaleString()}</p>
-                </div>`).join('');
+                 <div onclick="openReceipt('${t.id}')" class="p-5 flex justify-between items-center text-sm font-bold cursor-pointer hover:bg-slate-50">
+        <div>
+            <p>${t.name}</p>
+            <!-- Father Name niche add kiya -->
+            <p class="text-[8px] text-slate-400 font-bold uppercase">S/O: ${t.fatherName || '---'}</p>
+            <p class="text-[9px] text-slate-400 uppercase font-normal mt-1">${t.date}</p>
+        </div>
+        <p class="${t.type==='Udhaar'?'text-rose-500':'text-emerald-600'}">PKR ${Number(t.amount).toLocaleString()}</p>
+    </div>`).join('');
 
             // Customer List
-            document.getElementById('customer-list-ui').innerHTML = data.customers.map(c => `<div class="bg-white p-6 rounded-[2rem] shadow-sm border-l-8 ${c.balance>0?'border-l-rose-500':'border-l-emerald-500'} flex justify-between items-center"><div onclick="viewCustomer('${c.name}')" class="flex-1 cursor-pointer"><h4 class="font-black text-slate-800 text-lg">${c.name}</h4><p class="text-xl font-black ${c.balance>0?'text-rose-500':'text-emerald-600'}">PKR ${c.balance.toLocaleString()}</p></div><button onclick="confirmDelete('${c.name}')" class="p-3 text-rose-500"><i data-lucide="trash-2"></i></button></div>`).join('');
+            document.getElementById('customer-list-ui').innerHTML = data.customers.map(c => `<div class="bg-white p-6 rounded-[2rem] shadow-sm border-l-8 ${c.balance > 0 ? 'border-l-rose-500' : 'border-l-emerald-500'} flex justify-between items-center">
+        <div onclick="viewCustomer('${c.name}')" class="flex-1 cursor-pointer">
+            <h4 class="font-black text-slate-800 text-lg leading-tight">${c.name}</h4>
+            <!-- Father Name yahan add kiya gaya hai -->
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight mb-2">S/O: ${c.fatherName || '---'}</p>
+            
+            <p class="text-xl font-black ${c.balance > 0 ? 'text-rose-500' : 'text-emerald-600'}">
+                PKR ${c.balance.toLocaleString()}
+            </p>
+        </div>
+        <button onclick="confirmDelete('${c.name}')" class="p-3 text-rose-500">
+            <i data-lucide="trash-2"></i>
+        </button>
+    </div>`).join('');
             
             // Full Transaction Records Tab (FIXED: Added Description Here)
             document.getElementById('full-txn-list').innerHTML = data.allTransactions.map(t => `
